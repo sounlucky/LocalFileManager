@@ -2,16 +2,27 @@
 #include "sender.h"
 
 int main() {
-    //Client client(22901, "localhost");
+    //an object required, but not supposed to be right
+    try{
+        Client client(2292, "localhost");
 
-    string text = "simpleText";
-    vector<byte> res(2);
-    res.push_back('c');
-    res += (string)"back";
-    string ms = string(res);
+        vector<byte> a;
+        a.push_back('b');a.push_back('c');a.push_back('c');
+
+       string xcv = "sads";
+        xcv = vecToString(a);
+
+        client.run();
+
+
+        client.login("username", "passw0rd");
+    }
+    catch (Client::errors e){
+        std::cout<<"err " << (int32_t) e;
+    }
 
     /*
-    vector<string> localMenu = {"~File Manager", "~login:", ">", "~password:", ">", "~host:", ">localhost", "connect!",
+    vector<string> localMenu = {"~File Manager", "~enter hostname:" ">localhost", "connect!",
                                 "registration", "exit"};
     vector<string> localContent = {"~no data yet!"};
 
@@ -22,7 +33,12 @@ int main() {
     while (contCycle) {
         menuPointer pointer = objMenu.getInput();
 
-        if (localMenu[0] == "~File Manager") {
+    }
+
+    /*
+      if (localMenu[0] == "~File Manager") {
+            constexpr uint8_t LOGIN = 2;
+            constexpr uint8_t PASSWORD = 4;
             constexpr uint8_t CONNECT = 7;
             constexpr uint8_t REGISTRATION = 8;
             constexpr uint8_t EXIT = 9;
@@ -34,8 +50,10 @@ int main() {
                     break;
 
                 case REGISTRATION:
+
                     localMenu = {"~registration", "~name:", ">", "~password:", ">", "reg me in!", "back to menu"};
                     localContent = {"~no data yet!"};
+
                     break;
 
                 case EXIT:
@@ -51,13 +69,13 @@ int main() {
             constexpr uint8_t BACK_TO_MENU = 3;
 
             switch (pointer.pos) {
-                case UPLOAD://upload
+                case UPLOAD:
                     break;
 
-                case CREATE_FOLDER://create folder
+                case CREATE_FOLDER:
                     break;
 
-                case BACK_TO_MENU://back to menu
+                case BACK_TO_MENU:
                     localMenu = {"~File Manager", "~login:", ">", "~password:", ">", "~host:",
                                  ">localhost", "connect!", "registration", "exit"};
                     localContent = {"~no data yet!"};
@@ -67,11 +85,17 @@ int main() {
                     break;
             }
         } else if (localMenu[0] == "~registration") {
+
+            constexpr uint8_t NAME = 2;
+            constexpr uint8_t PASSWORD = 4;
             constexpr uint8_t REG_ME_IN = 5;
             constexpr uint8_t BACK_TO_MENU = 6;
-            constexpr uint8_t EXIT = 9;
+
             switch (pointer.pos) {
                 case REG_ME_IN:
+
+
+
                     break;
 
                 case BACK_TO_MENU:
@@ -84,6 +108,7 @@ int main() {
                     break;
             }
         }
-    }*/
+    }
+     */
     return 0;
 }

@@ -114,7 +114,7 @@ private:
     static constexpr uint16_t DELETE = 127;
 
     void draw() {
-        system("clear");
+        //system("clear");
         update();
         for (size_t i = 0; i < height; i++) {
             for (size_t g = 0; g < width; g++)
