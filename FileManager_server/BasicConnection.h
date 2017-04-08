@@ -1,10 +1,9 @@
 //
 // Created by unl on 06.04.17.
 //
-#include <iostream>
 #include <netdb.h>
 #include <unistd.h>
-#include <fstream>
+#include <string>
 #include <vector>
 
 using std::string; using std::vector;
@@ -28,29 +27,39 @@ public:
     ~BasicConnection() = default;
 
     virtual void run(){
-        throw errors::ERnotImplementedWork;
+        throw errors::implementedWork;
     };
 
     enum class errors{
-        ERonOpeningSocket,
-        ERonBinding,
-        ERonAccepting,
-        ERonReading,
-        ERonResponding,
-        ERtooSmallInput,
-        ERonWriting,
-        ERnotImplementedWork,
-        ERonFindingHost,
-        ERonConnecting
+        openingSocket = 1,
+        binding,
+        accepting,
+        reading,
+        responding,
+        smallInput,
+        writing,
+        implementedWork,
+        findingHost,
+        connecting,
+        unknownRequest
     };
+
+    enum class requests{
+        REGISTRATION = 'R',
+               LOGIN = 'L',
+        FILE_LISTING = 'F',
+              UPLOAD = 'U',
+            DOWNLOAD = 'D'
+    };
+
     void sendRawBytes(const vector<byte>& info){
 
         uint64_t lengthBuffer = info.size();
         if (write(sockfd, &lengthBuffer, sizeof(lengthBuffer)) < 0)
-            throw errors ::ERonWriting;
+            throw errors ::writing;
 
         if ( write(sockfd, &info.at(0), info.size() ) < 0)
-            throw errors ::ERonWriting;
+            throw errors ::writing;
 
         return;
     }
@@ -59,7 +68,7 @@ public:
 
         uint64_t lengthBuffer = 0;
         if (read(sockfd, &lengthBuffer, sizeof(lengthBuffer)) < 0)
-            throw errors::ERonReading;
+            throw errors::reading;
 
         vector<byte> responceBytes(lengthBuffer);
         read(sockfd , &responceBytes.at(0) , lengthBuffer);
