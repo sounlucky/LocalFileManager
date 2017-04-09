@@ -1,10 +1,13 @@
 #include "menu.h"
 #include "sender.h"
 
+
+
+
 int main() {
     //an object required, but not supposed to be right
     try{
-        Client client(22321, "localhost");
+        Client client(11321, "localhost");
 
         vector<byte> a;
         a.push_back('b');a.push_back('c');a.push_back('c');
@@ -13,8 +16,8 @@ int main() {
         xcv = vecToString(a);
 
         client.run();
-
-        client.login("nothotusername", "easypassword");
+        //client.login("user", "pass");
+        client.getFileListing("CMakeFiles" , "user" ,"pass");
     }
     catch (Client::errors e){
         std::cout<<"err " << (int32_t) e;

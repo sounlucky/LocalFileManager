@@ -27,7 +27,7 @@ vector<byte>& operator+=(vector<byte>& vec, const string str){
 }
 
 string vecToString(vector<byte> vec){
-    string res(vec.size(),'v');
+    string res(vec.size(),'\0');
     if (vec.size() > 0)
         bcopy(  &vec[0], &res[0], vec.size() );
     return res;
@@ -35,7 +35,7 @@ string vecToString(vector<byte> vec){
 
 int64_t vecToNum(vector<byte> vec){
     string temp = vecToString(vec);
-    return atoi( temp.c_str());
+    return atoi( temp.c_str());//should test std::to_int64 !
 }
 
 class Client : public BasicConnection {
@@ -88,13 +88,28 @@ public:
         return;
     }
 
+    vector<string> getFileListing(string path , string username, string password){
+        vector<byte> request;
+        request += (char)Client::requests::FILE_LISTING + username + '&' + password + '&' + path;
 
+        sendRawBytes(request);
 
-    vector<string> getFileListing(){
+        vector<byte> respond = recieveRawBytes();
 
+        vector<string> files;
+
+        string temp = "";
+        //parsing
+        for (auto ch : respond){
+            if (ch == '\n') {
+                files.push_back(temp);
+                temp = "";
+            }
+            else
+                temp += ch;
+        }
+        return files;
     }
-
-
 
 };
 

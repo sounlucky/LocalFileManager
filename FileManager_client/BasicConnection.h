@@ -78,6 +78,10 @@ public:
 
         return responceBytes;
     }
+
+    vector<string> requestFiles(string path){
+
+    }
 };
 
 
