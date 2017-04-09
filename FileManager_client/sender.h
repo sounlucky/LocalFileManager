@@ -64,20 +64,20 @@ public:
 
     void registrate(string name, string pass){
         vector<byte> toSend;
-        toSend += 'R' + name + '&' + pass;
+        toSend += (char)Client::requests::REGISTRATION + name + '&' + pass;
 
         sendRawBytes(toSend);
 
         vector<byte> respond = recieveRawBytes();
 
-        if (  vecToNum(respond) != 0 )
+        if (  vecToNum(respond) != (uint8_t) Client::errors::noErrors )
             throw (Client::errors)vecToNum(respond);
         return;
     }
 
     void login(string name, string pass){
         vector<byte> toSend;
-        toSend += (char)Client::requests::REGISTRATION + name + '&' + pass;
+        toSend += (char)Client::requests::LOGIN + name + '&' + pass;
 
         sendRawBytes(toSend);
 

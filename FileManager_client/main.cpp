@@ -4,18 +4,17 @@
 int main() {
     //an object required, but not supposed to be right
     try{
-        Client client(2292, "localhost");
+        Client client(22321, "localhost");
 
         vector<byte> a;
         a.push_back('b');a.push_back('c');a.push_back('c');
 
-       string xcv = "sads";
+        string xcv = "sads";
         xcv = vecToString(a);
 
         client.run();
 
-
-        client.login("username", "passw0rd");
+        client.login("nothotusername", "easypassword");
     }
     catch (Client::errors e){
         std::cout<<"err " << (int32_t) e;
