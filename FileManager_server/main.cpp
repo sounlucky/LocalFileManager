@@ -3,6 +3,8 @@
 //
 #include <iostream>
 #include <fstream>
+#include <array>
+#include <memory>
 #include "string.h"
 #include "BasicConnection.h"
 
@@ -24,26 +26,26 @@ string vecToString(vector<byte> vec){
     return res;
 }
 
-class Server : public BasicConnection
-{
+int main() {
+    try {
+        Server serv(11321);
+        serv.run();
+    }
+    catch ( Server::errors & er){
+        cout<<"Error code "<<(int)er;
+        return (int)er;
+    }
+}
+
+class Server : public BasicConnection {
+
 public:
 
     Server(int32_t inPort) {
         port = inPort;
     }
 
-    vector<string> getFileListing(){
-
-    }
-
     void run(){
-        // <--------------->
-
-
-
-
-
-        // <--------------->
         int32_t n, selfsockfd;
         sockaddr_in cli_addr;
         selfsockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -57,7 +59,7 @@ public:
         address.sin_port = htons(port);
 
         if ( bind( selfsockfd, (sockaddr*) &address, sizeof(address) ) < 0 )
-        throw  Server::errors::binding;
+            throw  Server::errors::binding;
 
         listen(selfsockfd,10);
 
@@ -81,7 +83,7 @@ public:
             int64_t dbUsersSize = dbUsers.tellg();
 
             dbUsers.seekg(0 , std::ios::beg);
-            string dbUsersInformation(dbUsersSize , 'A');
+            string dbUsersInformation(dbUsersSize , '\0');
 
             dbUsers.read(&dbUsersInformation.at(0) , dbUsersSize);
 
@@ -90,27 +92,25 @@ public:
 
             switch  (reqLetter){
                 case (byte)Server::requests::REGISTRATION :
-                    //request example: Rusername&psswrd
+                    //request example: R<username>&<psswrd>
                     if (doesUserExist(request, dbUsersInformation)) {
-                        cout << "user already registered " << std::endl;
                         respond += std::to_string((uint8_t) Server::errors ::alreadyRegistered);
                     } else {
-                        cout << "new user " <<  std::endl;
                         registrate(request, dbUsers);
                         respond += std::to_string((uint8_t) Server::errors ::noErrors);
                     }
                     break;
 
                 case (byte)Server::requests::LOGIN :
-                    //request example: Lusername&password
-                    if (doesAccExist(request ,dbUsersInformation)) {
-                        cout << "success on login!" << std::endl;
+                    //request example: L<username>&<password>
+                    if (doesAccExist(request ,dbUsersInformation))
                         respond += std::to_string((uint8_t) Server::errors ::noErrors);
-                    }
-                    else {
-                        cout << "did not log in" << std::endl;
+                    else
                         respond += std::to_string((uint8_t) Server::errors ::badLogin);
-                    }
+                    break;
+                case (byte)Server::requests::FILE_LISTING:
+                    //request example: F<username>&<password>&<folder1/folder2/>
+                    respond += sendFileListing(request , dbUsersInformation);
                     break;
 
                 default:
@@ -121,6 +121,69 @@ public:
         }
     }
 
+    string getFileListing(string path){
+        if (path != "")
+            return
+                //folders
+                    exec( string( "cd  fileStorage/ " + path + ";" + "ls -d */" ).c_str())
+                //files
+                    + exec( string( "cd  fileStorage/ " + path + ";" + "ls "    ).c_str());
+        else
+            return //same here , but path is const and equal "" for obvious reasons
+                    exec(  "cd  fileStorage/ ; ls -d */" )
+                    + exec(  "cd  fileStorage/ ; ls "    );
+    }
+
+    std::string exec(const char* cmd) {
+
+        constexpr int16_t BUFFER_LENGTH = 0xFF;
+
+        std::array<char, BUFFER_LENGTH> buffer;
+        string res;
+        std::shared_ptr<FILE> cmdReader(popen(cmd, "r"), pclose);
+        while (!feof(cmdReader.get())) {
+            if (fgets(buffer.data(), BUFFER_LENGTH, cmdReader.get()) != NULL) {
+                res += buffer.data();
+            }
+        }
+        return res;
+    }
+
+    string sendFileListing(vector<byte>& request, string& dbUsersInformation){
+
+        vector<byte> userData;   // username&password
+        string folderData;// folder1/folder2/
+
+        vector<string>::size_type i = 0;
+
+        //parse the request into userData and folderData
+        while (request[i] != '&') {
+            userData.push_back(request[i]);
+            i++;
+        }
+        //found username
+        userData.push_back('&');
+        i++;
+
+        while (request[i] != '&') {
+            userData.push_back(request[i]);
+            i++;
+        }
+        //found password
+        i++;//skip '&'
+        while ( i < request.size() ){
+            folderData += request[i];
+            i++;
+        }
+
+        if (doesAccExist(userData ,dbUsersInformation))
+            return getFileListing(folderData);
+        else
+            return  std::to_string((uint8_t) Server::errors ::badLogin);
+
+    }
+
+
     void registrate(const vector<byte>& request , std::fstream& dbUsers){
         dbUsers.open("dbUsers" , std::ios::app);
         dbUsers.write(reinterpret_cast<const char*>(&request[1]), request.size() - 1);
@@ -130,13 +193,16 @@ public:
 
     bool doesAccExist(const vector<byte>& request , const string& fileInfo){
         string line;
-        //figure out username
+
         string::size_type i = 0;
         while ( i < fileInfo.length() ){
             switch (fileInfo[i]){
                 case '\n':
-                    if (line == vecToString(request).substr(1,request.size()))
+                    //obv beginning of the new line
+                    if (line == vecToString(request).substr(1,request.size())) {
+                        cout << "account does exist" << std::endl;
                         return true;
+                    }
                     line = "";
                     break;
 
@@ -146,6 +212,7 @@ public:
             }
             i++;
         }
+        cout << "account doesnt exist" << std::endl;
         return false;
     }
 
@@ -179,35 +246,29 @@ public:
             switch(fileInfo[i]){
                 case '&':
                     //check if he has found one
-                    if (currUsername == uName)
+                    if (currUsername == uName) {
+                        cout << " user does exist" << std::endl;
                         return true;
+                    }
 
                     //dont really need passwords, just skip 'em
                     while ( fileInfo[++i] != '\n')
                         if (i < fileInfo.length())
                             break;
                     break;
+
                 case '\n':
                     //obv its beginning of the next username
                     currUsername = "";
                     break;
+
                 default:
                     currUsername += fileInfo[i];
                     break;
             }
             i++;
         }
+        cout << "user does not exist" << std::endl;
         return false;
     }
 };
-
-int main() {
-    try {
-        Server serv(22321);
-        serv.run();
-    }
-    catch ( Server::errors & er){
-        cout<<"Error code "<<(int)er;
-        return (int)er;
-    }
-}
