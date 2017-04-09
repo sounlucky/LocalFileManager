@@ -31,7 +31,8 @@ public:
     };
 
     enum class errors{
-        openingSocket = 1,
+        noErrors,
+        openingSocket,//1
         binding,
         accepting,
         reading,
@@ -40,8 +41,10 @@ public:
         writing,
         implementedWork,
         findingHost,
-        connecting,
-        unknownRequest
+        connecting,//10
+        unknownRequest,
+        alreadyRegistered,
+        badLogin
     };
 
     enum class requests{
