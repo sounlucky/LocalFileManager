@@ -26,17 +26,6 @@ string vecToString(vector<byte> vec){
     return res;
 }
 
-int main() {
-    try {
-        Server serv(11321);
-        serv.run();
-    }
-    catch ( Server::errors & er){
-        cout<<"Error code "<<(int)er;
-        return (int)er;
-    }
-}
-
 class Server : public BasicConnection {
 
 public:
@@ -272,3 +261,15 @@ public:
         return false;
     }
 };
+
+
+int main() {
+    try {
+        Server serv(102010);
+        serv.run();
+    }
+    catch ( Server::errors & er){
+        cout<<"Error code "<<(int)er;
+        return (int)er;
+    }
+}

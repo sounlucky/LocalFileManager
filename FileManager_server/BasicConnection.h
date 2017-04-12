@@ -14,11 +14,9 @@ using std::string; using std::vector;
 
 typedef uint8_t byte;
 
-
 class BasicConnection {
 
 public:
-    vector<string> logs;
     int32_t  sockfd, port;
     string hostname;
     sockaddr_in address;
@@ -32,7 +30,7 @@ public:
 
     enum class errors{
         noErrors,
-        openingSocket,//1
+        openingSocket,
         binding,
         accepting,
         reading,
@@ -49,10 +47,10 @@ public:
 
     enum class requests{
         REGISTRATION = 'R',
-               LOGIN = 'L',
+        LOGIN = 'L',
         FILE_LISTING = 'F',
-              UPLOAD = 'U',
-            DOWNLOAD = 'D'
+        UPLOAD = 'U',
+        DOWNLOAD = 'D'
     };
 
     void sendRawBytes(const vector<byte>& info){
@@ -77,6 +75,10 @@ public:
         read(sockfd , &responceBytes.at(0) , lengthBuffer);
 
         return responceBytes;
+    }
+
+    vector<string> requestFiles(string path){
+
     }
 };
 
