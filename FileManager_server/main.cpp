@@ -34,7 +34,8 @@ public:
         port = inPort;
     }
 
-    void run(){
+    void run(){ string dbg;
+
         int32_t n, selfsockfd;
         sockaddr_in cli_addr;
         selfsockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -45,7 +46,7 @@ public:
 
         address.sin_family = AF_INET;
         address.sin_addr.s_addr = INADDR_ANY;
-        address.sin_port = htons(port);
+        address.sin_port = htons( static_cast<uint16_t >(port) );
 
         if ( bind( selfsockfd, (sockaddr*) &address, sizeof(address) ) < 0 )
             throw  Server::errors::binding;
@@ -55,6 +56,7 @@ public:
         socklen_t clilen = sizeof(cli_addr);
 
         while(1){
+            printf("\n waiting... \n");
             sockfd = accept(selfsockfd,(struct sockaddr *) &cli_addr, &clilen);
 
             vector<byte> request = recieveRawBytes(),
@@ -96,18 +98,37 @@ public:
                         respond += std::to_string((uint8_t) Server::errors ::noErrors);
                     else
                         respond += std::to_string((uint8_t) Server::errors ::badLogin);
+                    //responce is obv 1 byte
                     break;
                 case (byte)Server::requests::FILE_LISTING:
                     //request example: F<username>&<password>&<folder1/folder2/>
                     respond += sendFileListing(request , dbUsersInformation);
+                    //responce is obv 1 byte
+                    break;
+
+                case (byte)Server::requests::UPLOAD:
+                    //request example: U<username>&<password>&<folder1/folder2/file>&<bytes>
+
+                    //
+                    break;
+
+                case (byte)Server::requests::DOWNLOAD:
+                    //request example: D<username>&<password>&<folder1/folder2/file>
+                    respond = getBinary(request);
+                    //responce is just a file
                     break;
 
                 default:
                     respond += std::to_string((uint8_t) Server::errors ::unknownRequest);
                     break;
             }
+            std::cout << "resp : " << vecToString(respond);
             sendRawBytes(respond);
         }
+    }
+
+    vector<byte> getBinary(vector<byte> request){
+
     }
 
     string getFileListing(string path){
@@ -116,11 +137,11 @@ public:
                 //folders
                     exec( string( "cd  fileStorage/ " + path + ";" + "ls -d */" ).c_str())
                 //files
-                    + exec( string( "cd  fileStorage/ " + path + ";" + "ls "    ).c_str());
+                    + exec( string( "cd  fileStorage/ " + path + ";" + "ls -p | grep -v /"    ).c_str());
         else
             return //same here , but path is const and equal "" for obvious reasons
                     exec(  "cd  fileStorage/ ; ls -d */" )
-                    + exec(  "cd  fileStorage/ ; ls "    );
+                    + exec(  "cd  fileStorage/ ; ls -p | grep -v / " );
     }
 
     std::string exec(const char* cmd) {
@@ -139,6 +160,9 @@ public:
     }
 
     string sendFileListing(vector<byte>& request, string& dbUsersInformation){
+
+
+        // вот этот парсер еще в 2х испоьзоваться будет <----------------------
 
         vector<byte> userData;   // username&password
         string folderData;// folder1/folder2/
@@ -265,11 +289,12 @@ public:
 
 int main() {
     try {
-        Server serv(102010);
+        constexpr int32_t PORT = 23810;
+        Server serv( PORT );
         serv.run();
     }
     catch ( Server::errors & er){
-        cout<<"Error code "<<(int)er;
+        cout<<"Error code "<< (int16_t) er;
         return (int)er;
     }
 }

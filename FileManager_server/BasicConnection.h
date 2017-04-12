@@ -42,7 +42,8 @@ public:
         connecting,//10
         unknownRequest,
         alreadyRegistered,
-        badLogin
+        badLogin,
+        emptyResponce
     };
 
     enum class requests{
@@ -71,7 +72,11 @@ public:
         if (read(sockfd, &lengthBuffer, sizeof(lengthBuffer)) < 0)
             throw errors::reading;
 
+        if (lengthBuffer == 0)
+            throw errors::emptyResponce;
+
         vector<byte> responceBytes(lengthBuffer);
+
         read(sockfd , &responceBytes.at(0) , lengthBuffer);
 
         return responceBytes;
