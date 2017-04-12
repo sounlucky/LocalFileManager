@@ -1,116 +1,91 @@
 #include "menu.h"
 #include "sender.h"
 
-
-
-
 int main() {
-    //an object required, but not supposed to be right
-    try{
-        Client client(11321, "localhost");
 
-        vector<byte> a;
-        a.push_back('b');a.push_back('c');a.push_back('c');
+    Client *client;
 
-        string xcv = "sads";
-        xcv = vecToString(a);
+    constexpr uint32_t PORT = 102010;
 
-        client.run();
-        //client.login("user", "pass");
-        client.getFileListing("CMakeFiles" , "user" ,"pass");
-    }
-    catch (Client::errors e){
-        std::cout<<"err " << (int32_t) e;
-    }
 
-    /*
-    vector<string> localMenu = {"~File Manager", "~enter hostname:" ">localhost", "connect!",
-                                "registration", "exit"};
-    vector<string> localContent = {"~no data yet!"};
+    client =  new Client(PORT, "localhost");
+    client->run();
+    client->login("user", "pass");
+    auto n = client->getFileListing("");
 
-    menu<70, 8> objMenu(localMenu, localContent);
+    constexpr uint16_t  CLIENT_WIDTH = 70;
+    constexpr uint16_t CLIENT_HEIGHT = 15;
 
-    bool contCycle = true;
+    vector<string> localMenu = { "~File Manager" , "~username:" , ">" , "~password:" , ">" , "~host:" , ">localhost" , "connect!" , "registration" , "exit" };
+    vector<string> localContent = { "~no data yet" };
 
-    while (contCycle) {
-        menuPointer pointer = objMenu.getInput();
+    menu< CLIENT_WIDTH , CLIENT_HEIGHT> objMenu(localMenu, localContent);
 
-    }
+    bool endCycle = false;
 
-    /*
-      if (localMenu[0] == "~File Manager") {
-            constexpr uint8_t LOGIN = 2;
-            constexpr uint8_t PASSWORD = 4;
-            constexpr uint8_t CONNECT = 7;
-            constexpr uint8_t REGISTRATION = 8;
-            constexpr uint8_t EXIT = 9;
+    while (!endCycle){
 
-            switch (pointer.pos) {
-                case CONNECT:
-                    localMenu = {"~options", "upload", "create folder", "back to menu"};
-                    localContent = {"~files", "file1", "file2", "file3"};
-                    break;
+        menu<CLIENT_WIDTH, CLIENT_HEIGHT>::menuPointer pointer = objMenu.getInput();
 
-                case REGISTRATION:
 
-                    localMenu = {"~registration", "~name:", ">", "~password:", ">", "reg me in!", "back to menu"};
-                    localContent = {"~no data yet!"};
+        vector<string> vector1;
 
-                    break;
+        try {
 
-                case EXIT:
-                    contCycle = false;
-                    break;
+            if (localMenu[0] == "~File Manager"){
 
-                default:
-                    break;
+                constexpr uint8_t     USERNAME = 2;
+                constexpr uint8_t     PASSWORD = 4;
+                constexpr uint8_t     HOSTNAME = 6;
+                constexpr uint8_t      CONNECT = 7;
+                constexpr uint8_t REGISTRATION = 8;
+                constexpr uint8_t         EXIT = 9;
+
+                    switch (pointer.pos) {
+
+                        case CONNECT:
+                            client = new Client(PORT , objMenu.rawStr(localMenu[HOSTNAME]));
+                            client->run();
+                            client->login(menu<CLIENT_WIDTH ,CLIENT_HEIGHT>::rawStr(localMenu[USERNAME]),
+                                          menu<CLIENT_WIDTH , CLIENT_HEIGHT>::rawStr(localMenu[PASSWORD]));
+                            localMenu = {"welcome" , "upload file" , "back to menu" , "exit" };
+
+                            std::cout<< '\n' << client->username <<' '<<client->password;
+
+                             client->getFileListing("CMakeFiles/");
+
+                            for (auto i: vector1)
+                                std::cout<< '\n' << i;
+                            break;
+
+                        case REGISTRATION:
+                            client = new Client(PORT , objMenu.rawStr(localMenu[HOSTNAME]));
+                            client->run();
+                            client->registrate(menu<CLIENT_WIDTH , CLIENT_HEIGHT>::rawStr(localMenu[USERNAME]),
+                                               menu<CLIENT_WIDTH , CLIENT_HEIGHT>::rawStr(localMenu[PASSWORD]));
+                            localMenu = {"welcome" , "upload file" , "back to menu" , "exit" };
+                            client->getFileListing("");
+                            break;
+
+                        case EXIT:
+                            endCycle = true;
+                            break;
+
+                        default:
+                            break;
+                    }
+
+            } else if (localMenu[0] == "Back to menu"){
+                localMenu = { "~File Manager" , "~username:" , ">" , "~password:" , ">" , "~host:" , ">localhost" , "connect!" , "registration" , "exit" };
+                localContent = { "~no data yet" };
             }
-        } else if (localMenu[0] == "~options") {
-            constexpr uint8_t UPLOAD = 1;
-            constexpr uint8_t CREATE_FOLDER = 2;
-            constexpr uint8_t BACK_TO_MENU = 3;
+        } catch (Client::errors e){
 
-            switch (pointer.pos) {
-                case UPLOAD:
-                    break;
+            delete client;
 
-                case CREATE_FOLDER:
-                    break;
-
-                case BACK_TO_MENU:
-                    localMenu = {"~File Manager", "~login:", ">", "~password:", ">", "~host:",
-                                 ">localhost", "connect!", "registration", "exit"};
-                    localContent = {"~no data yet!"};
-                    break;
-
-                default:
-                    break;
-            }
-        } else if (localMenu[0] == "~registration") {
-
-            constexpr uint8_t NAME = 2;
-            constexpr uint8_t PASSWORD = 4;
-            constexpr uint8_t REG_ME_IN = 5;
-            constexpr uint8_t BACK_TO_MENU = 6;
-
-            switch (pointer.pos) {
-                case REG_ME_IN:
-
-
-
-                    break;
-
-                case BACK_TO_MENU:
-                    localMenu = {"~File Manager", "~login:", ">", "~password:", ">", "host:",
-                                 ">localhost", "connect!", "registration", "exit"};
-                    localContent = {"~no data yet!"};
-                    break;
-
-                default:
-                    break;
-            }
+            localMenu = {"Back to menu"};
+            localContent = { ( "Something bad happened. Error code : " + std::to_string( static_cast<int>(e) ) ) };
         }
     }
-     */
     return 0;
 }

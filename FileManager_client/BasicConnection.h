@@ -14,11 +14,9 @@ using std::string; using std::vector;
 
 typedef uint8_t byte;
 
-
 class BasicConnection {
 
 public:
-    vector<string> logs;
     int32_t  sockfd, port;
     string hostname;
     sockaddr_in address;

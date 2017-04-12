@@ -10,14 +10,15 @@
 #include <termios.h>
 
 
-struct menuPointer {
-    bool inMenu;
-    uint16_t pos;
-};
-
 template<uint16_t width, uint16_t height>
 class menu{
 public:
+
+    struct menuPointer {
+        bool inMenu;
+        uint16_t pos;
+    };
+
     menu(std::vector<std::string> &inMenu, std::vector<std::string> &inContent) :
             linked_menu(inMenu), linked_content(inContent) {
         std::string border(width, '_'),
@@ -104,6 +105,10 @@ public:
             draw();
         }
         return pointer;
+    }
+
+    static std::string rawStr(std::string in) {
+        return (in[0] == '~') || (in[0] == '>') ? in.substr(1, in.length()) : in;
     }
 
 private:
@@ -213,10 +218,6 @@ private:
 
     inline bool inputAble(std::string in) {
         return in[0] == '>';
-    }
-
-    inline std::string rawStr(std::string in) {
-        return (in[0] == '~') || (in[0] == '>') ? in.substr(1, in.length()) : in;
     }
 
     inline std::vector<std::string> &currMenu() {

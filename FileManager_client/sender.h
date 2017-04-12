@@ -40,6 +40,8 @@ int64_t vecToNum(vector<byte> vec){
 
 class Client : public BasicConnection {
 public:
+    string username,
+            password;
 
     Client(uint32_t inPort , string inHostname){
         port = inPort;
@@ -85,11 +87,15 @@ public:
 
         if (  vecToNum(respond) != 0 )
             throw (Client::errors)vecToNum(respond);
+
+        username = name;
+        password = pass;
         return;
     }
 
-    vector<string> getFileListing(string path , string username, string password){
+    vector<string> getFileListing(string path){
         vector<byte> request;
+
         request += (char)Client::requests::FILE_LISTING + username + '&' + password + '&' + path;
 
         sendRawBytes(request);
@@ -108,6 +114,7 @@ public:
             else
                 temp += ch;
         }
+
         return files;
     }
 
