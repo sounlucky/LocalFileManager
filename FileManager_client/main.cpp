@@ -2,16 +2,9 @@
 #include "sender.h"
 
 int main() {
+    Client* client;
 
-    Client *client;
-
-    constexpr uint32_t PORT = 102010;
-
-
-    client =  new Client(PORT, "localhost");
-    client->run();
-    client->login("user", "pass");
-    auto n = client->getFileListing("");
+    constexpr int32_t PORT = 23810;
 
     constexpr uint16_t  CLIENT_WIDTH = 70;
     constexpr uint16_t CLIENT_HEIGHT = 15;
@@ -45,26 +38,18 @@ int main() {
 
                         case CONNECT:
                             client = new Client(PORT , objMenu.rawStr(localMenu[HOSTNAME]));
-                            client->run();
-                            client->login(menu<CLIENT_WIDTH ,CLIENT_HEIGHT>::rawStr(localMenu[USERNAME]),
-                                          menu<CLIENT_WIDTH , CLIENT_HEIGHT>::rawStr(localMenu[PASSWORD]));
+                            client->login(menu<CLIENT_WIDTH ,CLIENT_HEIGHT>::rawStr(localMenu[USERNAME]),//just strings "name"
+                                          menu<CLIENT_WIDTH , CLIENT_HEIGHT>::rawStr(localMenu[PASSWORD]));//and "pass"
                             localMenu = {"welcome" , "upload file" , "back to menu" , "exit" };
-
-                            std::cout<< '\n' << client->username <<' '<<client->password;
-
-                             client->getFileListing("CMakeFiles/");
-
-                            for (auto i: vector1)
-                                std::cout<< '\n' << i;
+                            localContent = client->getFileListing("");
                             break;
 
                         case REGISTRATION:
                             client = new Client(PORT , objMenu.rawStr(localMenu[HOSTNAME]));
-                            client->run();
-                            client->registrate(menu<CLIENT_WIDTH , CLIENT_HEIGHT>::rawStr(localMenu[USERNAME]),
-                                               menu<CLIENT_WIDTH , CLIENT_HEIGHT>::rawStr(localMenu[PASSWORD]));
+                            client->registrate(menu<CLIENT_WIDTH , CLIENT_HEIGHT>::rawStr(localMenu[USERNAME]), //same
+                                               menu<CLIENT_WIDTH , CLIENT_HEIGHT>::rawStr(localMenu[PASSWORD]));//as above
                             localMenu = {"welcome" , "upload file" , "back to menu" , "exit" };
-                            client->getFileListing("");
+                            localContent = client->getFileListing("");
                             break;
 
                         case EXIT:

@@ -65,6 +65,8 @@ public:
     }
 
     void registrate(string name, string pass){
+        run();// вот она
+
         vector<byte> toSend;
         toSend += (char)Client::requests::REGISTRATION + name + '&' + pass;
 
@@ -78,11 +80,11 @@ public:
     }
 
     void login(string name, string pass){
+        run();// еще
+
         vector<byte> toSend;
         toSend += (char)Client::requests::LOGIN + name + '&' + pass;
-
         sendRawBytes(toSend);
-
         vector<byte> respond = recieveRawBytes();
 
         if (  vecToNum(respond) != 0 )
@@ -94,12 +96,12 @@ public:
     }
 
     vector<string> getFileListing(string path){
+        run();// и вообще везде
+
         vector<byte> request;
 
         request += (char)Client::requests::FILE_LISTING + username + '&' + password + '&' + path;
-
         sendRawBytes(request);
-
         vector<byte> respond = recieveRawBytes();
 
         vector<string> files;
