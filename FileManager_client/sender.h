@@ -19,7 +19,6 @@ vector<byte> operator+(const vector<byte>& vec, const string& str){
 
 vector<byte>& operator+=(vector<byte>& vec, const string str){
     vec.resize( vec.size() + str.length() );
-
     if (str.length() > 0)
         bcopy( &str[0], &vec[ vec.size() - str.length() ] , str.length() );
 
@@ -42,7 +41,6 @@ class Client : public BasicConnection {
 public:
     string username,
             password;
-
     Client(uint32_t inPort , string inHostname){
         port = inPort;
         hostname = inHostname;
@@ -65,47 +63,38 @@ public:
     }
 
     void registrate(string name, string pass){
-        run();// вот она
-
+        run();
         vector<byte> toSend;
         toSend += (char)Client::requests::REGISTRATION + name + '&' + pass;
-
         sendRawBytes(toSend);
-
         vector<byte> respond = recieveRawBytes();
-
         if (  vecToNum(respond) != (uint8_t) Client::errors::noErrors )
             throw (Client::errors)vecToNum(respond);
         return;
     }
 
     void login(string name, string pass){
-        run();// еще
-
+        run();
         vector<byte> toSend;
         toSend += (char)Client::requests::LOGIN + name + '&' + pass;
         sendRawBytes(toSend);
         vector<byte> respond = recieveRawBytes();
-
         if (  vecToNum(respond) != 0 )
             throw (Client::errors)vecToNum(respond);
-
         username = name;
         password = pass;
         return;
     }
 
     vector<string> getFileListing(string path){
-        run();// и вообще везде
-
+        run();
         vector<byte> request;
-
         request += (char)Client::requests::FILE_LISTING + username + '&' + password + '&' + path;
         sendRawBytes(request);
         vector<byte> respond = recieveRawBytes();
-
         vector<string> files;
-
+        if (path != "")
+            files.push_back("..");
         string temp = "";
         //parsing
         for (auto ch : respond){
@@ -116,8 +105,11 @@ public:
             else
                 temp += ch;
         }
-
         return files;
+    }
+
+    void downloadFile(string path){
+
     }
 
 };

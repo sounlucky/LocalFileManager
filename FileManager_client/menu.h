@@ -19,6 +19,8 @@ public:
         uint16_t pos;
     };
 
+    menuPointer pointer;
+
     menu(std::vector<std::string> &inMenu, std::vector<std::string> &inContent) :
             linked_menu(inMenu), linked_content(inContent) {
         std::string border(width, '_'),
@@ -112,12 +114,11 @@ public:
     }
 
 private:
-    static constexpr uint16_t UP = 65;
-    static constexpr uint16_t DOWN = 66;
-    static constexpr uint16_t TAB = 9;
-    static constexpr uint16_t ENTER = 10;
-    static constexpr uint16_t DELETE = 127;
-
+    static constexpr uint16_t   UP = 65,
+                                DOWN = 66,
+                                TAB = 9,
+                                ENTER = 10,
+                                DELETE = 127;
     void draw() {
         //system("clear");
         update();
@@ -159,7 +160,6 @@ private:
                 if ((i % 2) && j == width / 3)
                     actualField[i][j] = '|';
                 else actualField[i][j] = ' ';
-
         //Menu
         uint16_t iterator = aboveMenu();
         for (uint16_t i = 1;//drawing from 1
@@ -175,7 +175,6 @@ private:
             }
             iterator++;
         }
-
         //Content
         iterator = aboveContent();
         for (uint16_t i = 1;
@@ -229,7 +228,6 @@ private:
     }
 
     std::vector<std::string> actualField;
-    menuPointer pointer;
     std::vector<std::string> &linked_menu;
     std::vector<std::string> &linked_content;
 };

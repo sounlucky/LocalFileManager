@@ -34,7 +34,7 @@ public:
         binding,
         accepting,
         reading,
-        responding,//5
+        responding,
         smallInput,
         writing,
         implementedWork,
@@ -58,10 +58,9 @@ public:
         uint64_t lengthBuffer = info.size();
         if (write(sockfd, &lengthBuffer, sizeof(lengthBuffer)) < 0)
             throw errors ::writing;
-
-        if ( write(sockfd, &info.at(0), info.size() ) < 0)
-            throw errors ::writing;
-
+        if (lengthBuffer > 0)
+            if ( write(sockfd, &info.at(0), info.size() ) < 0)
+                throw errors ::writing;
         return;
     }
 
@@ -69,14 +68,9 @@ public:
         uint64_t lengthBuffer = 0;
         if (read(sockfd, &lengthBuffer, sizeof(lengthBuffer)) < 0)
             throw errors::reading;
-
-        if (lengthBuffer == 0)
-            throw errors::emptyResponce;
-
         vector<byte> responceBytes(lengthBuffer);
-
-        read(sockfd , &responceBytes.at(0) , lengthBuffer);
-
+        if (lengthBuffer > 0)
+            read(sockfd , &responceBytes.at(0) , lengthBuffer);
         return responceBytes;
     }
 
