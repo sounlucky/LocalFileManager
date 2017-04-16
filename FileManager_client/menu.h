@@ -1,6 +1,7 @@
 //
 // Created by unl on 02.04.17.
 //
+#pragma once
 
 #include <iostream>
 #include <vector>
@@ -120,7 +121,7 @@ private:
                                 ENTER = 10,
                                 DELETE = 127;
     void draw() {
-        //system("clear");
+        system("clear");
         update();
         for (size_t i = 0; i < height; i++) {
             for (size_t g = 0; g < width; g++)
