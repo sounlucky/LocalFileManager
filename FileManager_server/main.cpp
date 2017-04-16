@@ -32,22 +32,32 @@ class Server : public BasicConnection {
 
 public:
 
-    Server(int32_t inPort) {
+    Server(uint32_t inPort) {
         port = inPort;
     }
 
+    const string STORAGE_FOLDER_NAME = "fileStorage/";
+
     void run() {
+        /*
+        vector<byte> request;
+        request += "Duser&pass&file2";
+        string virtualFile = "user&pass";
+        vector<byte> res = getFile(request , virtualFile );
+        for (auto i:res)
+            cout << i << " ";*/
+        //dbg
         int32_t n, selfsockfd;
         sockaddr_in cli_addr;
         selfsockfd = socket(AF_INET, SOCK_STREAM, 0);
         if (selfsockfd < 0)
-            throw Server::errors::openingSocket;
+            throw errors::openingSocket;
         bzero((char *) &address, sizeof(address));
         address.sin_family = AF_INET;
         address.sin_addr.s_addr = INADDR_ANY;
         address.sin_port = htons(static_cast<uint16_t>(port));
         if (bind(selfsockfd, (sockaddr *) &address, sizeof(address)) < 0)
-            throw Server::errors::binding;
+            throw errors::binding;
         listen(selfsockfd, 10);
         socklen_t clilen = sizeof(cli_addr);
         while (1) {
@@ -56,7 +66,7 @@ public:
             vector<byte> request = recieveRawBytes(),
                     respond;
             //debugging purposes , rm after
-            for (auto &i : request)
+            for (auto i : request)
                 cout << i;
             cout << std::endl;
             const byte reqLetter = request[0];
@@ -64,79 +74,72 @@ public:
             dbUsers.seekg(0, std::ios::end);
             int64_t dbUsersSize = dbUsers.tellg();
             dbUsers.seekg(0, std::ios::beg);
-            string dbUsersInformation(dbUsersSize, '\0');
+            string dbUsersInformation(static_cast<uint64_t>(dbUsersSize), '\0');
             dbUsers.read(&dbUsersInformation.at(0), dbUsersSize);
             //ATTENTION! Its closed here!
             dbUsers.close();
-            switch (reqLetter) {
-                case (byte) Server::requests::REGISTRATION :
+            switch (static_cast<requests>(reqLetter)) {
+                case requests::REGISTRATION :
                     //request example: R<username>&<psswrd>
                     if (doesUserExist(request, dbUsersInformation)) {
-                        respond += std::to_string((uint8_t) Server::errors::alreadyRegistered);
+                        respond += std::to_string((uint8_t) errors::alreadyRegistered);
                     } else {
                         registrate(request, dbUsers);
-                        respond += std::to_string((uint8_t) Server::errors::noErrors);
+                        respond += std::to_string((uint8_t) errors::noErrors);
                     }
                     break;
-                case (byte) Server::requests::LOGIN :
+                case requests::LOGIN:
                     //request example: L<username>&<password>
                     if (doesAccExist(request, dbUsersInformation))
-                        respond += std::to_string((uint8_t) Server::errors::noErrors);
+                        respond += std::to_string((uint8_t) errors::noErrors);
                     else
-                        respond += std::to_string((uint8_t) Server::errors::badLogin);
+                        respond += std::to_string((uint8_t) errors::badLogin);
                     //responce is obv 1 byte
                     break;
-                case (byte) Server::requests::FILE_LISTING:
+                case requests::FILE_LISTING:
                     //request example: F<username>&<password>&<folder1/folder2/>
                     respond += sendFileListing(request, dbUsersInformation);
                     //responce is obv 1 byte
                     break;
-                case (byte) Server::requests::UPLOAD:
+                case requests::UPLOAD:
                     //request example: U<username>&<password>&<folder1/folder2/file>&<bytes>
-                    //
+                    writeFile(request , dbUsersInformation);
+                    respond += std::to_string((uint8_t) errors::noErrors);
                     break;
-                case (byte) Server::requests::DOWNLOAD:
+                case requests::DOWNLOAD:
                     //request example: D<username>&<password>&<folder1/folder2/file>
                     respond = getFile(request , dbUsersInformation);
-                    //responce is just a file
-                    break;
-
-                default:
-                    respond += std::to_string((uint8_t) Server::errors::unknownRequest);
                     break;
             }
-            std::cout << "resp : " << vecToString(respond);
+            std::cout << "resp : \n" << vecToString(respond);
             sendRawBytes(respond);
         }
     }
 
-    vector<byte> getFile(vector<byte> request, string& dbUsersInformation) {
-        //todo ,not working
+    vector<byte> getFile(vector<byte> request , string& dbUsersInformation) {
         string path = parse(request , dbUsersInformation);
-        std::ifstream file(path, std::ios::binary);
-
-        // Stop eating new lines in binary mode!!!
-        file.unsetf(std::ios::skipws);
-
-        // get its size:
-        std::streampos fileSize;
-
-        file.seekg(0, std::ios::end);
-        fileSize = file.tellg();
-        file.seekg(0, std::ios::beg);
-
-        // reserve capacity
-        std::vector<byte> vec;
-        vec.reserve(fileSize);
-
-        // read the data:
-        vec.insert(vec.begin(),
-                   std::istream_iterator<byte>(file),
-                   std::istream_iterator<byte>());
-
-        return vec;
+        std::ifstream fileStream(STORAGE_FOLDER_NAME + path , std::ios::binary | std::ios::ate);
+        std::ifstream::pos_type fSize = fileStream.tellg();
+        if (fSize <= 0)
+            throw errors::hackingAttempt;
+        vector<byte> res(static_cast<uint64_t>(fSize));
+        fileStream.seekg(0 , std::ios::beg);
+        fileStream.read(reinterpret_cast<char*>(&res.at(0)) , fSize);
+        fileStream.close();
+        return res;
     }
 
+    void writeFile(vector<byte> request , string& dbUsersInformation){
+        string pathAndBytes =   parse(request , dbUsersInformation),
+                                path;
+        while (pathAndBytes.front() != '&' && pathAndBytes.length() > 0){
+            path += pathAndBytes.front();
+            pathAndBytes = pathAndBytes.substr(1 , pathAndBytes.length());
+        }
+        std::ofstream fileStream(STORAGE_FOLDER_NAME + path , std::ios::binary | std::ios::trunc);
+        fileStream.write(reinterpret_cast<const char*>(&request[pathAndBytes.length() + 1]) , request.size() - pathAndBytes.length() - 1);
+        fileStream.close();
+    }
 
     std::string exec(const char *cmd) {
         constexpr int16_t BUFFER_LENGTH = 0xFF;
@@ -176,21 +179,20 @@ public:
             i++;
         }
         if (!doesAccExist(userData, dbUsersInformation))
-            throw std::to_string((uint8_t) Server::errors::badLogin);
+            throw std::to_string((uint8_t) errors::badLogin);
         return rawData;
     }
 
     string sendFileListing(vector<byte> &request, string &dbUsersInformation) {
         string path = parse(request , dbUsersInformation),
-            folders = exec(string("cd  fileStorage/" + path + "; ls -d */").c_str()),
-                files = exec(string("cd  fileStorage/" + path + "; ls -p | grep -v /").c_str());
+            folders = exec(string("cd " + STORAGE_FOLDER_NAME + path + "; ls -d */").c_str()),
+                files = exec(string("cd " + STORAGE_FOLDER_NAME + path + "; ls -p | grep -v /").c_str());
+        // dont crash please
         if (folders == "ls: cannot access '*/': No such file or directory")
             return files;
         else
             return folders + files;
-
 }
-
 
     void registrate(const vector<byte> &request, std::fstream &dbUsers) {
         dbUsers.open("dbUsers", std::ios::app);
@@ -275,12 +277,12 @@ public:
 
 int main() {
     try {
-        constexpr int32_t PORT = 1810;
+        constexpr int32_t PORT = 2312;
         Server serv(PORT);
         serv.run();
     }
     catch (Server::errors &er) {
-        cout << "Error code " << (int16_t) er;
+        cout << "Server shut down. Error code " << (int16_t) er;
         return (int) er;
     }
 }

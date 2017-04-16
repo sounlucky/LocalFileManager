@@ -1,16 +1,14 @@
 //
 // Created by unl on 06.04.17.
 //
+#pragma once
+
 #include <netdb.h>
 #include <unistd.h>
 #include <string>
 #include <vector>
 
 using std::string; using std::vector;
-
-
-#ifndef FILEMANAGER_SERVER_BASICCONNECTION_H
-#define FILEMANAGER_SERVER_BASICCONNECTION_H
 
 typedef uint8_t byte;
 
@@ -43,7 +41,9 @@ public:
         unknownRequest,
         alreadyRegistered,
         badLogin,
-        emptyResponce
+        emptyResponce,
+        hackingAttempt,
+        badFile
     };
 
     enum class requests{
@@ -73,11 +73,4 @@ public:
             read(sockfd , &responceBytes.at(0) , lengthBuffer);
         return responceBytes;
     }
-
-    vector<string> requestFiles(string path){
-
-    }
 };
-
-
-#endif //FILEMANAGER_SERVER_BASICCONNECTION_H
