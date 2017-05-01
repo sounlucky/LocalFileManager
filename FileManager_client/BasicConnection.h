@@ -8,15 +8,13 @@
 #include <string>
 #include <vector>
 
-using std::string; using std::vector;
-
 typedef uint8_t byte;
 
 class BasicConnection {
 
 public:
     int32_t  sockfd, port;
-    string hostname;
+    std::string hostname;
     sockaddr_in address;
 
     BasicConnection()  = default;
@@ -54,7 +52,7 @@ public:
         DOWNLOAD = 'D'
     };
 
-    void sendRawBytes(const vector<byte>& info){
+    void sendRawBytes(const std::vector<byte>& info){
         uint64_t lengthBuffer = info.size();
         if (write(sockfd, &lengthBuffer, sizeof(lengthBuffer)) < 0)
             throw errors ::writing;
@@ -64,11 +62,11 @@ public:
         return;
     }
 
-    vector<byte> recieveRawBytes(){
+    std::vector<byte> recieveRawBytes(){
         uint64_t lengthBuffer = 0;
         if (read(sockfd, &lengthBuffer, sizeof(lengthBuffer)) < 0)
             throw errors::reading;
-        vector<byte> responceBytes(lengthBuffer);
+        std::vector<byte> responceBytes(lengthBuffer);
         if (lengthBuffer > 0)
             read(sockfd , &responceBytes.at(0) , lengthBuffer);
         return responceBytes;

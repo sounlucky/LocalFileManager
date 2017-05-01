@@ -3,22 +3,12 @@
 
 int main() {
     Client* client;
-    //
-    /*
-    try {
-        client = new Client(2312, "localhost");
-        client->login("user", "pass");
-        client->uploadFile("", "a");
-    }catch (Client::errors e) {
-        return static_cast<int8_t>(e);
-    }*/
-    //
-    string currPath = "";
-    constexpr int32_t PORT = 2312;
+    std::string currPath = "";
+    constexpr int32_t PORT = 14841;
     constexpr uint16_t  CLIENT_WIDTH = 70,
                         CLIENT_HEIGHT = 15;
-    vector<string> localMenu = { "~File Manager" , "~username:" , ">user" , "~password:" , ">pass" , "~host:" , ">localhost" , "connect!" , "registration" , "exit" };
-    vector<string> localContent = { "~no data yet" };
+    std::vector<std::string> localMenu = { "~File Manager" , "~username:" , ">" , "~password:" , ">" , "~host:" , ">localhost" , "connect!" , "registration" , "exit" };
+    std::vector<std::string> localContent = { "~no data yet" };
     menu<CLIENT_WIDTH , CLIENT_HEIGHT> objMenu(localMenu, localContent);
     bool endCycle = false;
     while (!endCycle){

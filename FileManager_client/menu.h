@@ -40,7 +40,6 @@ public:
         border[0] = '|';
         border[width - 1] = '|';
         actualField.push_back(border);
-
 //create pointer
         pointer = {1, 0};
         for (uint16_t i = 0; i < inMenu.size(); i++)
@@ -61,7 +60,6 @@ public:
                     break;
                 }
         draw();
-
         unsigned char input;
         while ((input = getCh()) != ENTER) {
             switch (input) {
@@ -76,7 +74,6 @@ public:
                         }
                     }
                     break;
-
                 case DOWN:
                     for (uint16_t i = (uint16_t) ((pointer.pos + 1) % currMenu().size());
                          i != pointer.pos; i = (uint16_t) (
@@ -194,19 +191,19 @@ private:
     }
 
     //inlining stuff
-    inline uint16_t aboveTheCurrent() {
+    uint16_t aboveTheCurrent() {
         return (uint16_t) (pointer.pos / (height - 2) * (height - 2));
     }
 
-    inline uint16_t aboveMenu() {
+    uint16_t aboveMenu() {
         return (uint16_t) (pointer.inMenu ? aboveTheCurrent() : 0);
     }
 
-    inline uint16_t aboveContent() {
+    uint16_t aboveContent() {
         return (uint16_t) (!pointer.inMenu ? aboveTheCurrent() : 0);
     }
 
-    inline uint16_t tobeDrawn(std::vector<std::string> &in, uint16_t above) {
+    uint16_t tobeDrawn(std::vector<std::string> &in, uint16_t above) {
         return (uint16_t) ((uint16_t) in.size() - above > height - 2 ?
                            (unsigned long) (height - 2) :
                                 in.size() - above);
