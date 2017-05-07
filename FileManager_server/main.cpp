@@ -10,17 +10,15 @@
 #include "string.h"
 #include "BasicConnection.h"
 
-using std::cout;
-
-vector<byte> &operator+=(vector<byte> &vec, const string str) {
+std::vector<byte> &operator+=(std::vector<byte> &vec, const std::string str) {
     vec.resize(vec.size() + str.length());
     if (str.length() > 0)
         bcopy(&str[0], &vec[vec.size() - str.length()], str.length());
     return vec;
 }
 
-string vecToString(vector<byte> vec) {
-    string res(vec.size(), 'v');
+std::string vecToString(std::vector<byte> vec) {
+    std::string res(vec.size(), 'v');
     if (vec.size() > 0)
         bcopy(&vec[0], &res[0], vec.size());
     return res;
@@ -34,7 +32,7 @@ public:
         port = inPort;
     }
 
-    const string STORAGE_FOLDER_NAME = "fileStorage/";
+    const std::string STORAGE_FOLDER_NAME = "fileStorage/";
 
     void run() {
         int32_t n, selfsockfd;
@@ -53,17 +51,17 @@ public:
         while (1) {
             std::cout << "\n waiting... \n";
             sockfd = accept(selfsockfd, (struct sockaddr *) &cli_addr, &clilen);
-            vector<byte> request = recieveRawBytes(),
+            std::vector<byte> request = recieveRawBytes(),
                     respond;
             //debugging purposes , rm after
             for (auto i : request)
-                cout << i;
-            cout << std::endl;
+                std::cout << i;
+            std::cout << std::endl;
             const byte reqLetter = request[0];
             std::fstream dbUsers("dbUsers");
             dbUsers.seekg(0, std::ios::end);
             int64_t dbUsersSize = dbUsers.tellg();
-            string dbUsersInformation;
+            std::string dbUsersInformation;
             if (dbUsersSize <= 0){
                 std::ofstream fileStream("dbUsers" ,std::ios::trunc);
                 fileStream.close();
@@ -71,7 +69,7 @@ public:
             }
             else {
                 dbUsers.seekg(0, std::ios::beg);
-                string temp(static_cast<uint64_t>(dbUsersSize), '\0');
+                std::string temp(static_cast<uint64_t>(dbUsersSize), '\0');
                 dbUsersInformation = temp;
                 dbUsers.read(&dbUsersInformation.at(0), dbUsersSize);
             }
@@ -114,21 +112,21 @@ public:
         }
     }
 
-    vector<byte> getFile(vector<byte> request , string& dbUsersInformation) {
-        string path = parse(request , dbUsersInformation);
+    std::vector<byte> getFile(std::vector<byte> request , std::string& dbUsersInformation) {
+        std::string path = parse(request , dbUsersInformation);
         std::ifstream fileStream(STORAGE_FOLDER_NAME + path , std::ios::binary | std::ios::ate);
         std::ifstream::pos_type fSize = fileStream.tellg();
         if (fSize <= 0)
             throw errors::hackingAttempt;
-        vector<byte> res(static_cast<uint64_t>(fSize));
+        std::vector<byte> res(static_cast<uint64_t>(fSize));
         fileStream.seekg(0 , std::ios::beg);
         fileStream.read(reinterpret_cast<char*>(&res.at(0)) , fSize);
         fileStream.close();
         return res;
     }
 
-    void writeFile(vector<byte> request , string& dbUsersInformation){
-        string pathAndBytes =   parse(request , dbUsersInformation),
+    void writeFile(std::vector<byte> request , std::string& dbUsersInformation){
+        std::string pathAndBytes =   parse(request , dbUsersInformation),
                                 path;
         while (pathAndBytes.front() != '&' && pathAndBytes.length() > 0){
             path += pathAndBytes.front();
@@ -142,7 +140,7 @@ public:
     std::string exec(const char *cmd) {
         constexpr int16_t BUFFER_LENGTH = 0xFF;
         std::array<char, BUFFER_LENGTH> buffer;
-        string res;
+        std::string res;
         std::shared_ptr<FILE> cmdReader(popen(cmd, "r"), pclose);
         while (!feof(cmdReader.get())) {
             if (fgets(buffer.data(), BUFFER_LENGTH, cmdReader.get()) != NULL) {
@@ -152,13 +150,13 @@ public:
         return res;
     }
 
-    string parse(vector<byte> request, string& dbUsersInformation){
+    std::string parse(std::vector<byte> request, std::string& dbUsersInformation){
         // function converts
         // Auser&pass&text -> text
         // and also checking accExistence
-        vector<byte> userData;   // user&pass
-        string rawData;          // text
-        vector<string>::size_type i = 0;
+        std::vector<byte> userData;   // user&pass
+        std::string rawData;          // text
+        std::vector<std::string>::size_type i = 0;
         while (request[i] != '&') {
             userData.push_back(request[i]);
             i++;
@@ -181,10 +179,10 @@ public:
         return rawData;
     }
 
-    string sendFileListing(vector<byte> &request, string &dbUsersInformation) {
-        string path = parse(request , dbUsersInformation),
-            folders = exec(string("cd " + STORAGE_FOLDER_NAME + path + "; ls -d */").c_str()),
-                files = exec(string("cd " + STORAGE_FOLDER_NAME + path + "; ls -p | grep -v /").c_str());
+    std::string sendFileListing(std::vector<byte> &request, std::string &dbUsersInformation) {
+        std::string path = parse(request , dbUsersInformation),
+            folders = exec(std::string("cd " + STORAGE_FOLDER_NAME + path + "; ls -d */").c_str()),
+                files = exec(std::string("cd " + STORAGE_FOLDER_NAME + path + "; ls -p | grep -v /").c_str());
         // dont crash please
         if (folders == "ls: cannot access '*/': No such file or directory")
             return files;
@@ -192,7 +190,7 @@ public:
             return folders + files;
 }
 
-    void registrate(const vector<byte> &request, std::fstream &dbUsers) {
+    void registrate(const std::vector<byte> &request, std::fstream &dbUsers) {
         if (request.size() < 12)//too small
             throw errors::hackingAttempt;
         dbUsers.open("dbUsers", std::ios::app);
@@ -201,15 +199,15 @@ public:
         dbUsers.close();
     }
 
-    bool doesAccExist(const vector<byte> &request, const string &fileInfo) {
-        string line;
-        string::size_type i = 0;
+    bool doesAccExist(const std::vector<byte> &request, const std::string &fileInfo) {
+        std::string line;
+        std::string::size_type i = 0;
         while (i < fileInfo.length()) {
             switch (fileInfo[i]) {
                 case '\n':
                     //obv beginning of the new line
                     if (line == vecToString(request).substr(1, request.size())) {
-                        cout << "account does exist" << std::endl;
+                        std::cout << "account does exist" << std::endl;
                         return true;
                     }
                     line = "";
@@ -220,12 +218,12 @@ public:
             }
             i++;
         }
-        cout << "account doesnt exist" << std::endl;
+        std::cout << "account doesnt exist" << std::endl;
         return false;
     }
 
-    bool doesUserExist(const vector<byte> &request, const string &fileInfo) {
-        string uName;
+    bool doesUserExist(const std::vector<byte> &request, const std::string &fileInfo) {
+        std::string uName;
         //figure out username
         for (auto i = request.begin() + 1;
              i != request.end(); i++) {//we're starting with 2nd symbol coz 1st is meaningLetter
@@ -244,14 +242,14 @@ public:
                     break;
             }
         }
-        string currUsername;
-        string::size_type i = 0;
+        std::string currUsername;
+        std::string::size_type i = 0;
         while (i < fileInfo.length()) {
             switch (fileInfo[i]) {
                 case '&':
                     //check if he has found one
                     if (currUsername == uName) {
-                        cout << " user does exist" << std::endl;
+                        std::cout << " user does exist" << std::endl;
                         return true;
                     }
                     //dont really need passwords, just skip 'em
@@ -269,7 +267,7 @@ public:
             }
             i++;
         }
-        cout << "user does not exist" << std::endl;
+        std::cout << "user does not exist" << std::endl;
         return false;
     }
 };
@@ -281,7 +279,7 @@ int main() {
         serv.run();
     }
     catch (Server::errors &er) {
-        cout << "Server shut down. Error code " << (int16_t) er;
+        std::cout << "Server shut down. Error code " << (int16_t) er;
         return (int) er;
     }
 }
