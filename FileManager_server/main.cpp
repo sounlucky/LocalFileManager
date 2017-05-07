@@ -14,10 +14,8 @@ using std::cout;
 
 vector<byte> &operator+=(vector<byte> &vec, const string str) {
     vec.resize(vec.size() + str.length());
-
     if (str.length() > 0)
         bcopy(&str[0], &vec[vec.size() - str.length()], str.length());
-
     return vec;
 }
 
@@ -39,14 +37,6 @@ public:
     const string STORAGE_FOLDER_NAME = "fileStorage/";
 
     void run() {
-        /*
-        vector<byte> request;
-        request += "Duser&pass&file2";
-        string virtualFile = "user&pass";
-        vector<byte> res = getFile(request , virtualFile );
-        for (auto i:res)
-            cout << i << " ";*/
-        //dbg
         int32_t n, selfsockfd;
         sockaddr_in cli_addr;
         selfsockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -61,7 +51,7 @@ public:
         listen(selfsockfd, 10);
         socklen_t clilen = sizeof(cli_addr);
         while (1) {
-            printf("\n waiting... \n");
+            std::cout << "\n waiting... \n";
             sockfd = accept(selfsockfd, (struct sockaddr *) &cli_addr, &clilen);
             vector<byte> request = recieveRawBytes(),
                     respond;
@@ -73,9 +63,18 @@ public:
             std::fstream dbUsers("dbUsers");
             dbUsers.seekg(0, std::ios::end);
             int64_t dbUsersSize = dbUsers.tellg();
-            dbUsers.seekg(0, std::ios::beg);
-            string dbUsersInformation(static_cast<uint64_t>(dbUsersSize), '\0');
-            dbUsers.read(&dbUsersInformation.at(0), dbUsersSize);
+            string dbUsersInformation;
+            if (dbUsersSize <= 0){
+                std::ofstream fileStream("dbUsers" ,std::ios::trunc);
+                fileStream.close();
+                dbUsersInformation = "";
+            }
+            else {
+                dbUsers.seekg(0, std::ios::beg);
+                string temp(static_cast<uint64_t>(dbUsersSize), '\0');
+                dbUsersInformation = temp;
+                dbUsers.read(&dbUsersInformation.at(0), dbUsersSize);
+            }
             //ATTENTION! Its closed here!
             dbUsers.close();
             switch (static_cast<requests>(reqLetter)) {
@@ -111,7 +110,6 @@ public:
                     respond = getFile(request , dbUsersInformation);
                     break;
             }
-            std::cout << "resp : \n" << vecToString(respond);
             sendRawBytes(respond);
         }
     }
@@ -195,6 +193,8 @@ public:
 }
 
     void registrate(const vector<byte> &request, std::fstream &dbUsers) {
+        if (request.size() < 12)//too small
+            throw errors::hackingAttempt;
         dbUsers.open("dbUsers", std::ios::app);
         dbUsers.write(reinterpret_cast<const char*>(&request[1]), request.size() - 1);
         dbUsers << std::endl;
@@ -274,10 +274,9 @@ public:
     }
 };
 
-
 int main() {
     try {
-        constexpr int32_t PORT = 2312;
+        constexpr int32_t PORT = 14941;
         Server serv(PORT);
         serv.run();
     }
