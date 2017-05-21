@@ -1,115 +1,129 @@
+#include <iostream>
+#include <vector>
+
 #include "menu.h"
 #include "sender.h"
 
 int main() {
-    Client* client;
-    std::string currPath = "";
-    constexpr int32_t PORT = 14841;
-    constexpr uint16_t  CLIENT_WIDTH = 70,
-                        CLIENT_HEIGHT = 15;
-    std::vector<std::string> localMenu = { "~File Manager" , "~username:" , ">" , "~password:" , ">" , "~host:" , ">localhost" , "connect!" , "registration" , "exit" };
-    std::vector<std::string> localContent = { "~no data yet" };
-    menu<CLIENT_WIDTH , CLIENT_HEIGHT> objMenu(localMenu, localContent);
-    bool endCycle = false;
-    while (!endCycle){
-        menu<CLIENT_WIDTH , CLIENT_HEIGHT>::menuPointer pointer = objMenu.getInput();
-        try {
-            if (pointer.inMenu) {
-                if (localMenu[0] == "~File Manager") {
-                    constexpr uint8_t   USERNAME = 2,
-                                        PASSWORD = 4,
-                                        HOSTNAME = 6,
-                                        CONNECT = 7,
-                                        REGISTRATION = 8,
-                                        EXIT = 9;
-                    switch (pointer.pos) {
-                        case CONNECT:
-                            client = new Client(PORT, objMenu.rawStr(localMenu[HOSTNAME]));
-                            client->login(
-                                    menu<CLIENT_WIDTH, CLIENT_HEIGHT>::rawStr(localMenu[USERNAME]),//just strings "name"
-                                    menu<CLIENT_WIDTH, CLIENT_HEIGHT>::rawStr(localMenu[PASSWORD]));//and "pass"
-                            localMenu = {"~welcome", "upload file", "back to menu", "exit"};
-                            localContent = client->getFileListing(currPath);
+    Client* CurrentClient;
+    std::string CurrPath = "";
+    constexpr int32_t PORT = 14941;
+    constexpr uint16_t CLIENT_WIDTH = 70;
+    constexpr uint16_t CLIENT_HEIGHT = 15;
+    std::vector<std::string> LocalMenu = { "~File Manager" , "~username:" , ">" , "~password:" , ">" , "~host:" , ">localhost" , "connect!" , "registration" , "exit" };
+    std::vector<std::string> LocalContent = { "~no data yet" };
+    Menu<CLIENT_WIDTH , CLIENT_HEIGHT> ObjMenu(LocalMenu, LocalContent);
+    bool EndCycle = false;
+    while (!EndCycle)
+    {
+        menuPointer Pointer = ObjMenu.GetInput();
+        try
+        {
+            if (Pointer.InMenu)
+            {
+                if (LocalMenu[0] == "~File Manager")
+                {
+                    enum {
+                        OPTION_USERNAME = 2,
+                        OPTION_PASSWORD = 4,
+                        OPTION_HOSTNAME = 6,
+                        OPTION_CONNECT = 7,
+                        OPTION_REGISTRATION = 8,
+                        OPTION_EXIT = 9
+                    };
+                    switch (Pointer.pos)
+                    {
+                        case OPTION_CONNECT:
+                            CurrentClient = new Client(PORT, RawStr(LocalMenu[OPTION_HOSTNAME]));
+                            CurrentClient->Login(RawStr(LocalMenu[OPTION_USERNAME]), RawStr(LocalMenu[OPTION_PASSWORD]));
+                            LocalMenu = {"~welcome", "upload file", "back to menu", "exit"};
+                            LocalContent = CurrentClient->GetFileListing(CurrPath);
                             break;
-                        case REGISTRATION:
-                            client = new Client(PORT, objMenu.rawStr(localMenu[HOSTNAME]));
-                            client->registrate(menu<CLIENT_WIDTH, CLIENT_HEIGHT>::rawStr(localMenu[USERNAME]), //same
-                                               menu<CLIENT_WIDTH, CLIENT_HEIGHT>::rawStr(                      //as above
-                                                       localMenu[PASSWORD]));
-                            localMenu = {"~welcome", "upload file", "back to menu", "exit"};
-                            localContent = client->getFileListing(currPath);
+                        case OPTION_REGISTRATION:
+                            CurrentClient = new Client(PORT, RawStr(LocalMenu[OPTION_HOSTNAME]));
+                            CurrentClient->Registrate(RawStr(LocalMenu[OPTION_USERNAME]), RawStr(LocalMenu[OPTION_PASSWORD]));
+                            LocalMenu = {"~welcome", "upload file", "back to menu", "exit"};
+                            LocalContent = CurrentClient->GetFileListing(CurrPath);
                             break;
-                        case EXIT:
-                            endCycle = true;
+                        case OPTION_EXIT:
+                            EndCycle = true;
                             break;
                         default:
                             break;
                     }
-                } else if (localMenu[0] == "~welcome") {
-                    constexpr uint8_t   UPLOAD_FILE = 1,
-                                        BACK_TO_MENU = 2,
-                                        EXIT = 3;
-                    switch (pointer.pos) {
-                        case UPLOAD_FILE:
-                            localMenu = { "~uploading" , "~type filename:" , ">" , "upload" , "back" };
+                } else if (LocalMenu[0] == "~welcome")
+                {
+                    enum {
+                        OPTION_UPLOAD_FILE = 1,
+                        OPTION_BACK_TO_MENU = 2,
+                        OPTION_EXIT = 3
+                    };
+                    switch (Pointer.pos)
+                    {
+                        case OPTION_UPLOAD_FILE:
+                            LocalMenu = { "~uploading" , "~type filename:" , ">" , "upload" , "back" };
                             break;
-                        case BACK_TO_MENU:
-                            currPath = "";
-                            localMenu = {"~File Manager", "~username:", ">", "~password:", ">", "~host:", ">localhost",
+                        case OPTION_BACK_TO_MENU:
+                            CurrPath = "";
+                            LocalMenu = {"~File Manager", "~username:", ">", "~password:", ">", "~host:", ">localhost",
                                          "connect!", "registration", "exit"};
-                            localContent = {"~no data yet"};
+                            LocalContent = {"~no data yet"};
                             break;
-                        case EXIT:
-                            endCycle = true;
-                            break;
-                        default:
-                            break;
-                    }
-                }else if (localMenu[0] == "~uploading") {
-                    constexpr uint8_t   FILENAME = 2,
-                                        UPLOAD = 3,
-                                        BACK = 4;
-                    switch (pointer.pos){
-                        case UPLOAD:
-                            client->uploadFile(currPath , menu<CLIENT_WIDTH , CLIENT_HEIGHT>::rawStr(localMenu[FILENAME]));
-                            break;
-                        case BACK:
-                            localMenu = {"~welcome" , "upload file" , "back to menu" , "exit"};
+                        case OPTION_EXIT:
+                            EndCycle = true;
                             break;
                         default:
                             break;
                     }
-                }else if (localMenu[0] == "Back to menu") {
-                    currPath = "";
-                    localMenu = {"~File Manager", "~username:", ">", "~password:", ">", "~host:", ">localhost",
+                } else if (LocalMenu[0] == "~uploading")
+                {
+                    enum {
+                        OPTION_FILENAME = 2,
+                        OPTION_UPLOAD = 3,
+                        OPTION_BACK = 4
+                    };
+                    switch (Pointer.pos){
+                        case OPTION_UPLOAD:
+                            CurrentClient->UploadFile(CurrPath , RawStr(LocalMenu[OPTION_FILENAME]));
+                            break;
+                        case OPTION_BACK:
+                            LocalMenu = {"~welcome" , "upload file" , "back to menu" , "exit"};
+                            break;
+                        default:
+                            break;
+                    }
+                } else if (LocalMenu[0] == "Back to menu")
+                {
+                    CurrPath = "";
+                    LocalMenu = {"~File Manager", "~username:", ">", "~password:", ">", "~host:", ">localhost",
                                  "connect!", "registration", "exit"};
-                    localContent = {"~no data yet"};
+                    LocalContent = {"~no data yet"};
                 }
-            } else{
-                //in case the pointer is not in menu
-                if (localContent[pointer.pos].back() == '/'){
-                    //its folder
-                    currPath += localContent[pointer.pos];
-                    localContent = client->getFileListing(currPath);
-                    objMenu.pointer.pos = 0;
+            } else {
+                if (LocalContent[Pointer.pos].back() == '/')
+                {
+                    CurrPath += LocalContent[Pointer.pos];
+                    LocalContent = CurrentClient->GetFileListing(CurrPath);
+                    ObjMenu.Pointer.pos = 0;
                 }
-                else if (localContent[pointer.pos] == ".."){
-                    do{
-                        currPath.resize( currPath.size() - 1);
-                        std::cout<<currPath<<'\n';
+                else if (LocalContent[Pointer.pos] == "..")
+                {
+                    do {
+                        CurrPath.resize(CurrPath.size() - 1);
+                        std::cout<< CurrPath <<'\n';
                     }
-                    while (currPath.back() != '/' && currPath.size() > 0);
-                    localContent = client->getFileListing(currPath);
-                    objMenu.pointer.pos = 0;
-                }else{
-                    client->downloadFile(currPath + localContent[pointer.pos] , localContent[pointer.pos] );
-                }
+                    while (CurrPath.back() != '/' && CurrPath.size() > 0);
+                    LocalContent = CurrentClient->GetFileListing(CurrPath);
+                    ObjMenu.Pointer.pos = 0;
+                } else
+                    CurrentClient->DownloadFile(CurrPath + LocalContent[Pointer.pos] , LocalContent[Pointer.pos]);
             }
-        } catch (Client::errors e){
-            delete client;
-            currPath = "";
-            localMenu = {"Back to menu"};
-            localContent = { ( "Something bad happened. Error code : " + std::to_string( static_cast<int>(e) ) ) };
+        } catch (Client::errors e)
+        {
+            delete CurrentClient;
+            CurrPath = "";
+            LocalMenu = {"Back to menu"};
+            LocalContent = { ( "Something bad happened. Error code : " + std::to_string( static_cast<int>(e) ) ) };
         }
     }
     return 0;
