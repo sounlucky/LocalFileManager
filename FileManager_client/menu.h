@@ -2,15 +2,16 @@
 // Created by unl on 02.04.17.
 //
 #pragma once
+
 #include <unistd.h>
 #include <termios.h>
 
 struct menuPointer {
     bool InMenu;
-    uint16_t pos;
+    uint16_t Pos;
 };
 
-std::string RawStr(std::string in);
+std::string RawStr(std::string);
 
 template <uint16_t W, uint16_t H>
 class Menu{
@@ -37,9 +38,9 @@ private:
     uint16_t AboveTheCurrent();
     uint16_t AboveMenu();
     uint16_t AboveContent();
-    uint16_t ToBeDrawn(std::vector<std::string> &in, uint16_t above);
-    bool ChooseAble(std::string in);
-    bool InputAble(std::string in);
+    uint16_t ToBeDrawn(std::vector<std::string>&, uint16_t);
+    bool ChooseAble(std::string);
+    bool InputAble(std::string);
     std::vector<std::string> &CurrMenu();
     std::vector<std::string> &OthrMenu();
 };

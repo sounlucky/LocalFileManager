@@ -31,7 +31,7 @@ int main() {
                         OPTION_REGISTRATION = 8,
                         OPTION_EXIT = 9
                     };
-                    switch (Pointer.pos)
+                    switch (Pointer.Pos)
                     {
                         case OPTION_CONNECT:
                             CurrentClient = new Client(PORT, RawStr(LocalMenu[OPTION_HOSTNAME]));
@@ -58,7 +58,7 @@ int main() {
                         OPTION_BACK_TO_MENU = 2,
                         OPTION_EXIT = 3
                     };
-                    switch (Pointer.pos)
+                    switch (Pointer.Pos)
                     {
                         case OPTION_UPLOAD_FILE:
                             LocalMenu = { "~uploading" , "~type filename:" , ">" , "upload" , "back" };
@@ -82,7 +82,7 @@ int main() {
                         OPTION_UPLOAD = 3,
                         OPTION_BACK = 4
                     };
-                    switch (Pointer.pos){
+                    switch (Pointer.Pos){
                         case OPTION_UPLOAD:
                             CurrentClient->UploadFile(CurrPath , RawStr(LocalMenu[OPTION_FILENAME]));
                             break;
@@ -100,13 +100,13 @@ int main() {
                     LocalContent = {"~no data yet"};
                 }
             } else {
-                if (LocalContent[Pointer.pos].back() == '/')
+                if (LocalContent[Pointer.Pos].back() == '/')
                 {
-                    CurrPath += LocalContent[Pointer.pos];
+                    CurrPath += LocalContent[Pointer.Pos];
                     LocalContent = CurrentClient->GetFileListing(CurrPath);
-                    ObjMenu.Pointer.pos = 0;
+                    ObjMenu.Pointer.Pos = 0;
                 }
-                else if (LocalContent[Pointer.pos] == "..")
+                else if (LocalContent[Pointer.Pos] == "..")
                 {
                     do {
                         CurrPath.resize(CurrPath.size() - 1);
@@ -114,9 +114,9 @@ int main() {
                     }
                     while (CurrPath.back() != '/' && CurrPath.size() > 0);
                     LocalContent = CurrentClient->GetFileListing(CurrPath);
-                    ObjMenu.Pointer.pos = 0;
+                    ObjMenu.Pointer.Pos = 0;
                 } else
-                    CurrentClient->DownloadFile(CurrPath + LocalContent[Pointer.pos] , LocalContent[Pointer.pos]);
+                    CurrentClient->DownloadFile(CurrPath + LocalContent[Pointer.Pos] , LocalContent[Pointer.Pos]);
             }
         } catch (Client::errors e)
         {

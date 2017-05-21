@@ -36,7 +36,7 @@ public:
         BadFile
     };
 
-    enum class requests{
+    enum class requests {
         REGISTRATION = 'R',
         LOGIN = 'L',
         FILE_LISTING = 'F',
@@ -45,6 +45,6 @@ public:
     };
 
     virtual void Run();
-    void SendRawBytes(const std::vector<byte>& Info);
+    void SendRawBytes(const std::vector<byte>&);
     std::vector<byte> RecieveRawBytes();
 };

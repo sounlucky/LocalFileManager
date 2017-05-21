@@ -1,11 +1,11 @@
 template <uint16_t W, uint16_t H>
 menuPointer Menu<W,H>::GetInput() {
     //if menu has changed there's a chance of getting out of range
-    if (CurrMenu().size() < Pointer.pos)
+    if (CurrMenu().size() < Pointer.Pos)
         for (uint16_t i = 0; i < CurrMenu().size(); i++)
             if (ChooseAble(CurrMenu()[i]))
             {
-                Pointer.pos = i;
+                Pointer.Pos = i;
                 break;
             }
     Draw();
@@ -15,23 +15,23 @@ menuPointer Menu<W,H>::GetInput() {
         switch (Input)
         {
             case KEY_UP:
-                for (uint16_t i = (uint16_t) (Pointer.pos == 0 ? CurrMenu().size() - 1 : (int8_t) Pointer.pos -
+                for (uint16_t i = (uint16_t) (Pointer.Pos == 0 ? CurrMenu().size() - 1 : (int8_t) Pointer.Pos -
                                                                                          1 % CurrMenu().size());
-                     i != Pointer.pos;
+                     i != Pointer.Pos;
                      i = (uint16_t) (i == 0 ? CurrMenu().size() - 1 : (int8_t) i - 1 % CurrMenu().size()))
                 {
                     if (ChooseAble(CurrMenu()[i])) {
-                        Pointer.pos = i;
+                        Pointer.Pos = i;
                         break;
                     }
                 }
                 break;
             case KEY_DOWN:
-                for (uint16_t i = (uint16_t) ((Pointer.pos + 1) % CurrMenu().size());
-                     i != Pointer.pos; i = (uint16_t) (
+                for (uint16_t i = (uint16_t) ((Pointer.Pos + 1) % CurrMenu().size());
+                     i != Pointer.Pos; i = (uint16_t) (
                         (i + 1) % CurrMenu().size())) {
                     if (ChooseAble(CurrMenu()[i])) {
-                        Pointer.pos = i;
+                        Pointer.Pos = i;
                         break;
                     }
                 }
@@ -40,18 +40,18 @@ menuPointer Menu<W,H>::GetInput() {
                 for (uint16_t i = 0; i < OthrMenu().size(); i++)
                     if (ChooseAble(OthrMenu().at(i))) {
                         Pointer.InMenu = !Pointer.InMenu;
-                        Pointer.pos = i;
+                        Pointer.Pos = i;
                         break;
                     }
             default:
                 //probably Input
-                if (InputAble(CurrMenu()[Pointer.pos]))
+                if (InputAble(CurrMenu()[Pointer.Pos]))
                 {
                     if (('0' <= Input && Input <= '9') || ('A' <= Input && Input <= 'Z') ||
                         ('a' <= Input && Input <= 'z') || (Input == '.')) {
-                        CurrMenu()[Pointer.pos] += Input;
-                    } else if (Input == KEY_DELETE && CurrMenu()[Pointer.pos].length() > 1) {//delete
-                        CurrMenu()[Pointer.pos].pop_back();
+                        CurrMenu()[Pointer.Pos] += Input;
+                    } else if (Input == KEY_DELETE && CurrMenu()[Pointer.Pos].length() > 1) {//delete
+                        CurrMenu()[Pointer.Pos].pop_back();
                     }
                 }
         }
@@ -84,7 +84,7 @@ m_Linked_Menu(InMenu), m_Linked_Content(inContent) {
     for (uint16_t i = 0; i < InMenu.size(); i++)
         if (ChooseAble(InMenu[i]))
         {
-            Pointer.pos = i;
+            Pointer.Pos = i;
             break;
         }
 }
@@ -136,7 +136,7 @@ void Menu<W,H>::Update() {
          Iterator < ToBeDrawn(m_Linked_Menu, AboveMenu()) + AboveMenu();
          i += H / (ToBeDrawn(m_Linked_Menu, AboveMenu()) + 1))
     {
-        if (Pointer.InMenu && Iterator == Pointer.pos)
+        if (Pointer.InMenu && Iterator == Pointer.Pos)
         {
             m_ActualField[i][1] = '>';
         }
@@ -153,7 +153,7 @@ void Menu<W,H>::Update() {
     for (uint16_t i = 1;
          Iterator < ToBeDrawn(m_Linked_Content, AboveContent()) + AboveContent();
          i += H / (ToBeDrawn(m_Linked_Content, AboveContent()) + 1)) {
-        if (!Pointer.InMenu && Iterator == Pointer.pos) {
+        if (!Pointer.InMenu && Iterator == Pointer.Pos) {
             m_ActualField[i][W / 3 + 1] = '>';
         }
         for (uint16_t g = 0;
@@ -167,7 +167,7 @@ void Menu<W,H>::Update() {
 
 template <uint16_t W, uint16_t H>
 uint16_t Menu<W,H>::AboveTheCurrent() {
-    return (uint16_t) (Pointer.pos / (H - 2) * (H - 2));
+    return (uint16_t) (Pointer.Pos / (H - 2) * (H - 2));
 }
 
 template <uint16_t W, uint16_t H>

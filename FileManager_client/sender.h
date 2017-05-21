@@ -7,19 +7,19 @@
 
 #include "BasicConnection.h"
 
-std::vector<byte>& operator+=(std::vector<byte>& vec, const std::string Str);
-std::string VecToString(std::vector<byte> Vec);
-int64_t VecToNum(std::vector<byte> Vec);
+std::vector<byte>& operator+=(std::vector<byte>&, const std::string);
+std::string VecToString(std::vector<byte>);
+int64_t VecToNum(std::vector<byte>);
 
 class Client : public Connection {
 public:
     std::string Username;
     std::string Password;
-    Client(uint32_t InPort , std::string InHostname);
+    Client(uint32_t, std::string);
     void Run() override;
-    void Registrate(std::string Name, std::string pass);
-    void Login(std::string Name, std::string pass);
-    std::vector<std::string> GetFileListing(std::string path);
-    void DownloadFile(std::string path , std::string& filename);
-    void UploadFile(std::string Path, std::string Filename);
+    void Registrate(std::string,std::string);
+    void Login(std::string, std::string);
+    std::vector<std::string> GetFileListing(std::string);
+    void DownloadFile(std::string, std::string&);
+    void UploadFile(std::string, std::string);
 };
