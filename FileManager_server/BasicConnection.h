@@ -10,41 +10,33 @@
 
 typedef uint8_t byte;
 
-class BasicConnection {
-
+class Connection {
 public:
-    int32_t  sockfd, port;
-    std::string hostname;
-    sockaddr_in address;
-
-    BasicConnection()  = default;
-    ~BasicConnection() = default;
-
-    virtual void run(){
-        throw errors::implementedWork;
-    };
+    int32_t  Sockfd, Port;
+    std::string Hostname;
+    sockaddr_in Address;
 
     enum class errors{
-        noErrors,
-        openingSocket,
-        binding,
-        accepting,
-        reading,
-        responding,
-        smallInput,
-        writing,
-        implementedWork,
-        findingHost,
-        connecting,//10
-        unknownRequest,
-        alreadyRegistered,
-        badLogin,
-        emptyResponce,
-        hackingAttempt,
-        badFile
+        NoErrors,
+        OpeningSocket,
+        Binding,
+        Accepting,
+        Reading,
+        Responding,
+        SmallInput,
+        Writing,
+        ImplementedWork,
+        FindingHost,
+        Connecting,
+        UnknownRequest,
+        AlreadyRegistered,
+        BadLogin,
+        EmptyResponce,
+        HackingAttempt,
+        BadFile
     };
 
-    enum class requests{
+    enum class Requests{
         REGISTRATION = 'R',
         LOGIN = 'L',
         FILE_LISTING = 'F',
@@ -52,23 +44,7 @@ public:
         DOWNLOAD = 'D'
     };
 
-    void sendRawBytes(const std::vector<byte>& info){
-        uint64_t lengthBuffer = info.size();
-        if (write(sockfd, &lengthBuffer, sizeof(lengthBuffer)) < 0)
-            throw errors ::writing;
-        if (lengthBuffer > 0)
-            if ( write(sockfd, &info.at(0), info.size() ) < 0)
-                throw errors ::writing;
-        return;
-    }
-
-    std::vector<byte> recieveRawBytes(){
-        uint64_t lengthBuffer = 0;
-        if (read(sockfd, &lengthBuffer, sizeof(lengthBuffer)) < 0)
-            throw errors::reading;
-        std::vector<byte> responceBytes(lengthBuffer);
-        if (lengthBuffer > 0)
-            read(sockfd , &responceBytes.at(0) , lengthBuffer);
-        return responceBytes;
-    }
+    virtual void Run();
+    void SendRawBytes(const std::vector<byte>& Info);
+    std::vector<byte> RecieveRawBytes();
 };
